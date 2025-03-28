@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typewriter Effect - Laundry Instructions</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .typewriter-container {
+      max-width: 600px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .line {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      min-height: 1.6em;
+      color: #444;
+    }
+    #line0 {
+      white-space: nowrap;
+      overflow: hidden;
+      font-weight: bold;
+    }
+    #line10, #line11 {
+      text-align: right;
+      margin-right: 100px;
+    }
+    .cursor {
+      position: absolute;
+      display: inline-block;
+      width: 10px;
+      height: 20px;
+      background-color: #333;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .controls {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    button {
+      padding: 8px 16px;
+      font-family: 'Courier New', monospace;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="typewriter-container">
+    <div id="text-container">
+      <div class="line" id="line0"></div>
+      <div class="line" id="line1"></div>
+      <div class="line" id="line2"></div>
+      <div class="line" id="line3"></div>
+      <div class="line" id="line4"></div>
+      <div class="line" id="line5"></div>
+      <div class="line" id="line6"></div>
+      <div class="line" id="line7"></div>
+      <div class="line" id="line8"></div>
+      <div class="line" id="line9"></div>
+      <div class="line" id="line10"></div>
+      <div class="line" id="line11"></div>
+    </div>
+    <div class="cursor" id="cursor"></div>
+    <div class="controls">
+      <button id="play-btn">Play</button>
+      <button id="restart-btn">Restart</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const lines = [
+        "Instructions for washing button downs",
+        "Step 1: Pull all existing laundry out of dryer. Most of it will need to be rewashed.",
+        "Step 2: Place all button downs in washer.",
+        "Step 3: Wash button downs",
+        "Step 4: Once wash cycle has completed, remove all button downs from washer and place into dryer.",
+        "Step 5: Place new dryer sheet into dryer and turn on.",
+        "Before shirts are completely dry, but nearly dry, take out and hang up on coat hanger.",
+        "For purposes of today's exercise, you may treat the khakis in the bathroom hamper as a 'button down.'",
+        "I have class at 3:00.",
+        "If you can have this done before 2:00PM, it would be deeply appreciated.",
+        "With Love,",
+        "Blake."
+      ];
+      
+      const lineElements = [];
+      for (let i = 0; i < 12; i++) {
+        lineElements.push(document.getElementById(`line${i}`));
+      }
+      
+      const cursor = document.getElementById('cursor');
+      const playBtn = document.getElementById('play-btn');
+      const restartBtn = document.getElementById('restart-btn');
+      
+      let currentLine = 0;
+      let currentChar = 0;
+      let isTyping = false;
+      let typingInterval;
+      
+      function updateCursorPosition() {
+        if (currentLine >= lines.length) {
+          cursor.style.display = 'none';
+          return;
+        }
+        
+        const lineElement = lineElements[currentLine];
+        const containerRect = document.querySelector('.typewriter-container').getBoundingClientRect();
+        const lineRect = lineElement.getBoundingClientRect();
+        
+        const topPosition = lineRect.top - containerRect.top;
+        cursor.style.top = `${topPosition}px`;
+        
+        // Calculate approximate position based on number of characters
+        const charWidth = 9.6; // Approximate width of a character in Courier New
+        const currentText = lineElement.textContent || '';
+        const leftPosition = lineRect.left - containerRect.left + (currentText.length * charWidth);
+        cursor.style.left = `${leftPosition}px`;
+      }
+      
+      function typeWriter() {
+        if (currentLine >= lines.length) {
+          stopTyping();
+          return;
+        }
+        
+        if (currentChar < lines[currentLine].length) {
+          lineElements[currentLine].textContent += lines[currentLine].charAt(currentChar);
+          currentChar++;
+          updateCursorPosition();
+        } else {
+          currentChar = 0;
+          currentLine++;
+          
+          if (currentLine < lines.length) {
+            clearInterval(typingInterval);
+            setTimeout(() => {
+              updateCursorPosition();
+              typingInterval = setInterval(typeWriter, 50);
+            }, 500);
+          } else {
+            stopTyping();
+          }
+        }
+      }
+      
+      function startTyping() {
+        if (!isTyping) {
+          isTyping = true;
+          playBtn.textContent = 'Pause';
+          typingInterval = setInterval(typeWriter, 50);
+        } else {
+          stopTyping();
+        }
+      }
+      
+      function stopTyping() {
+        clearInterval(typingInterval);
+        isTyping = false;
+        playBtn.textContent = 'Play';
+      }
+      
+      function resetTypewriter() {
+        stopTyping();
+        currentLine = 0;
+        currentChar = 0;
+        for (let i = 0; i < lineElements.length; i++) {
+          lineElements[i].textContent = '';
+        }
+        cursor.style.display = 'inline-block';
+        updateCursorPosition();
+      }
+      
+      // Initialize cursor position
+      updateCursorPosition();
+      
+      // Event listeners
+      playBtn.addEventListener('click', startTyping);
+      restartBtn.addEventListener('click', resetTypewriter);
+      
+      // Auto start after a short delay
+      setTimeout(startTyping, 1000);
+    });
+  </script>
+</body>
+</html>
